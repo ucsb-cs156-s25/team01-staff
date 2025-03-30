@@ -54,7 +54,7 @@ jobs:
 
     - name: Append name of site to _config.yml
       run: | 
-          CONFIG_YML=frontend/docs-index/_config.yml
+          CONFIG_YML=docs-index/_config.yml
           OWNER_PLUS_REPOSITORY=${{github.repository}}
           OWNER=${{ github.repository_owner }}
           REPOSITORY=${OWNER_PLUS_REPOSITORY/$OWNER\//}
@@ -65,14 +65,14 @@ jobs:
     - name: Store PRs as JSON in _config.yml
       run: |
          pull_requests=${{toJSON(needs.get-pull-requests.outputs.pull_requests)}}
-         CONFIG_YML=frontend/docs-index/_config.yml
+         CONFIG_YML=docs-index/_config.yml
          echo "pull_requests: ${pull_requests}, CONFIG_YML: ${CONFIG_YML}"
          echo "pull_requests: ${pull_requests}" >> ${CONFIG_YML}
          cat ${CONFIG_YML}
     - name: Compose web site
       run: |
         mkdir -p site
-        cp -r frontend/docs-index/* site
+        cp -r docs-index/* site
   
     - name: Deploy 🚀
       uses: Wandalen/wretry.action@master
