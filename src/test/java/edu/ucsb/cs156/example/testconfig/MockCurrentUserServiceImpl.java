@@ -3,7 +3,12 @@ package edu.ucsb.cs156.example.testconfig;
 import edu.ucsb.cs156.example.entities.User;
 import edu.ucsb.cs156.example.services.CurrentUserServiceImpl;
 
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -14,20 +19,27 @@ public class MockCurrentUserServiceImpl extends CurrentUserServiceImpl {
 
   public User getMockUser(SecurityContext securityContext, Authentication authentication) {
     Object principal = authentication.getPrincipal();
+    Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
-    String googleSub = "fakeUser";
-    String email = "user@example.org";
-    String pictureUrl = "https://example.org/fake.jpg";
-    String fullName = "Fake User";
+    List<String> roles = authorities.stream()
+        .map(GrantedAuthority::getAuthority)
+        .toList();
+
+    boolean admin= roles.contains("ROLE_ADMIN"); 
+    String username = admin ? "Admin" : "User";
+  
+
+    String googleSub = "fake" + username;
+    String email = username + "@example.org";
+    String pictureUrl = "https://example.org/" + username + ".jpg";
+    String fullName = "Fake " + username;
     String givenName = "Fake";
-    String familyName = "User";
+    String familyName = username;
     boolean emailVerified = true;
     String locale="";
     String hostedDomain="example.org";
-    boolean admin=false;
 
     org.springframework.security.core.userdetails.User user = null;
-
 
     if (principal instanceof org.springframework.security.core.userdetails.User) {
       user = (org.springframework.security.core.userdetails.User) principal;
@@ -40,7 +52,7 @@ public class MockCurrentUserServiceImpl extends CurrentUserServiceImpl {
       emailVerified = true;
       locale="";
       hostedDomain="example.org";
-      admin= (user.getUsername().equals("admin"));
+      // admin= (user.getUsername().equals("admin"));
     }
 
     User u = User.builder()
@@ -63,6 +75,17 @@ public class MockCurrentUserServiceImpl extends CurrentUserServiceImpl {
   public User getUser() {
     SecurityContext securityContext = SecurityContextHolder.getContext();
     Authentication authentication = securityContext.getAuthentication();
+
+    System.out.println("MockCurrentUserServiceImpl.getUser() called");
+    System.out.println("authentication = " + authentication);
+    System.out.println("securityContext = " + securityContext);
+    Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+
+    System.out.println("authorities = " + authorities);
+
+    if ((authentication instanceof AnonymousAuthenticationToken)) {
+      return null;
+    }
 
     if (!(authentication instanceof OAuth2AuthenticationToken)) {
       return getMockUser(securityContext, authentication);
