@@ -52,7 +52,6 @@ public class MockCurrentUserServiceImpl extends CurrentUserServiceImpl {
       emailVerified = true;
       locale="";
       hostedDomain="example.org";
-      // admin= (user.getUsername().equals("admin"));
     }
 
     User u = User.builder()
