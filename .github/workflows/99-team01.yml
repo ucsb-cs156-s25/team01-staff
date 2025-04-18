@@ -321,8 +321,8 @@ jobs:
 
             When you've met all of the acceptance criteria:
 
-            **Make a PR**: Do a PR for this branch, being sure to enter a [reasonable title](https://ucsb-cs156.github.io/topics/pull_requests.html#pr-titles)
-            and [description](https://ucsb-cs156.github.io/topics/pull_requests.html#pr-descriptions).
+            **Make a PR**: Do a PR for this branch, being sure to enter a [reasonable title](https://ucsb-cs156.github.io/topics/pull_requests/#pr-titles)
+            and [description](https://ucsb-cs156.github.io/topics/pull_requests/#pr-descriptions).
 
             In the description, include the text "Closes #n" where `n` is the number of
             this issue.
@@ -464,8 +464,8 @@ jobs:
 
               When you've met all of the acceptance criteria:
   
-              **Make a PR**: Do a PR for this branch, being sure to enter a [reasonable title](https://ucsb-cs156.github.io/topics/pull_requests.html#pr-titles)
-              and [description](https://ucsb-cs156.github.io/topics/pull_requests.html#pr-descriptions).
+              **Make a PR**: Do a PR for this branch, being sure to enter a [reasonable title](https://ucsb-cs156.github.io/topics/pull_requests/#pr-titles)
+              and [description](https://ucsb-cs156.github.io/topics/pull_requests/#pr-descriptions).
   
               In the description, include the text "Closes #n" where `n` is the number of
               this issue.
