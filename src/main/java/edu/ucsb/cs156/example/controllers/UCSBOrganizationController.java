@@ -48,6 +48,22 @@ public class UCSBOrganizationController extends ApiController {
     }
 
     /**
+     * This method returns a single organization.
+     * @param orgCode code of the organization
+     * @return a single organization
+     */
+    @Operation(summary= "Get a single organization")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("")
+    public UCSBOrganization getById(
+            @Parameter(name="orgCode") @RequestParam String orgCode) {
+        UCSBOrganization organization = ucsbOrganizationRepository.findById(orgCode)
+                .orElseThrow(() -> new EntityNotFoundException(UCSBOrganization.class, orgCode));
+
+        return organization;
+    }
+
+    /**
      * This method creates a new organization. Accessible only to users with the role "ROLE_ADMIN".
      * @param orgCode code of the organization
      * @param orgTranslationShort short translation of the organization
