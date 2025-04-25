@@ -191,4 +191,124 @@ public class UCSBOrganizationControllerTests extends ControllerTestCase {
                 String responseString = response.getResponse().getContentAsString();
                 assertEquals(expectedJson, responseString);
         }
+
+        @WithMockUser(roles = { "ADMIN", "USER" })
+        @Test
+        public void admin_can_delete_a_organization() throws Exception {
+                // arrange
+
+                UCSBOrganization sbHacks = UCSBOrganization.builder()
+                                .orgCode("SBHacks")
+                                .orgTranslationShort("SBHacks: UCSB")
+                                .orgTranslation("SB Hacks: UCSB's Largest Hackathon")
+                                .inactive(true)
+                                .build();
+
+                when(ucsbOrganizationRepository.findById(eq("SBHacks"))).thenReturn(Optional.of(sbHacks));
+
+                // act
+                MvcResult response = mockMvc.perform(
+                                delete("/api/ucsborganization?orgCode=SBHacks")
+                                                .with(csrf()))
+                                .andExpect(status().isOk()).andReturn();
+
+                // assert
+                verify(ucsbOrganizationRepository, times(1)).findById("SBHacks");
+                verify(ucsbOrganizationRepository, times(1)).delete(any());
+
+                Map<String, Object> json = responseToJson(response);
+                assertEquals("UCSBOrganization with id SBHacks deleted", json.get("message"));
+        }
+
+
+        @WithMockUser(roles = { "ADMIN", "USER" })
+        @Test
+        public void admin_tries_to_delete_non_existant_organization_and_gets_right_error_message()
+                        throws Exception {
+                // arrange
+
+                when(ucsbOrganizationRepository.findById(eq("munger-hall"))).thenReturn(Optional.empty());
+
+                // act
+                MvcResult response = mockMvc.perform(
+                                delete("/api/ucsborganization?orgCode=munger-hall")
+                                                .with(csrf()))
+                                .andExpect(status().isNotFound()).andReturn();
+
+                // assert
+                verify(ucsbOrganizationRepository, times(1)).findById("munger-hall");
+                Map<String, Object> json = responseToJson(response);
+                assertEquals("UCSBOrganization with id munger-hall not found", json.get("message"));
     }
+
+     @WithMockUser(roles = { "ADMIN", "USER" })
+        @Test
+        public void admin_can_edit_an_existing_organization() throws Exception {
+                // arrange
+
+                UCSBOrganization sbHacks = UCSBOrganization.builder()
+                                .orgCode("SBHacks")
+                                .orgTranslationShort("SBHacks: UCSB")
+                                .orgTranslation("SB Hacks: UCSB's Largest Hackathon")
+                                .inactive(true)
+                                .build();
+
+                UCSBOrganization sbHacksEdited = UCSBOrganization.builder()
+                                .orgCode("SBHacks")
+                                .orgTranslationShort("SBHacks: UCSB edit")
+                                .orgTranslation("SB Hacks: UCSB's Largest Hackathon edited")
+                                .inactive(false)
+                                .build();
+
+                String requestBody = mapper.writeValueAsString(sbHacksEdited);
+
+                when(ucsbOrganizationRepository.findById(eq("SBHacks"))).thenReturn(Optional.of(sbHacks));
+
+                // act
+                MvcResult response = mockMvc.perform(
+                                put("/api/ucsborganization?orgCode=SBHacks")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .characterEncoding("utf-8")
+                                                .content(requestBody)
+                                                .with(csrf()))
+                                .andExpect(status().isOk()).andReturn();
+
+                // assert
+                verify(ucsbOrganizationRepository, times(1)).findById("SBHacks");
+                verify(ucsbOrganizationRepository, times(1)).save(sbHacksEdited); // should be saved with updated info
+                String responseString = response.getResponse().getContentAsString();
+                assertEquals(requestBody, responseString);
+        }
+
+        @WithMockUser(roles = { "ADMIN", "USER" })
+        @Test
+        public void admin_cannot_edit_organization_that_does_not_exist() throws Exception {
+                // arrange
+
+                UCSBOrganization editedOrganization = UCSBOrganization.builder()
+                                .orgCode("munger-hall")
+                                .orgTranslationShort("mh")
+                                .orgTranslation("munger")
+                                .inactive(true)
+                                .build();
+
+                String requestBody = mapper.writeValueAsString(editedOrganization);
+
+                when(ucsbOrganizationRepository.findById(eq("munger-hall"))).thenReturn(Optional.empty());
+
+                // act
+                MvcResult response = mockMvc.perform(
+                                put("/api/ucsborganization?orgCode=munger-hall")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .characterEncoding("utf-8")
+                                                .content(requestBody)
+                                                .with(csrf()))
+                                .andExpect(status().isNotFound()).andReturn();
+
+                // assert
+                verify(ucsbOrganizationRepository, times(1)).findById("munger-hall");
+                Map<String, Object> json = responseToJson(response);
+                assertEquals("UCSBOrganization with id munger-hall not found", json.get("message"));
+                
+        }
+}

@@ -56,7 +56,7 @@ public class UCSBOrganizationController extends ApiController {
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("")
     public UCSBOrganization getById(
-            @Parameter(name="orgCode") @RequestParam String orgCode) {
+        @Parameter(name="orgCode") @RequestParam String orgCode) {
         UCSBOrganization organization = ucsbOrganizationRepository.findById(orgCode)
                 .orElseThrow(() -> new EntityNotFoundException(UCSBOrganization.class, orgCode));
 
@@ -79,9 +79,7 @@ public class UCSBOrganizationController extends ApiController {
         @Parameter(name="orgTranslationShort") @RequestParam String orgTranslationShort,
         @Parameter(name="orgTranslation") @RequestParam String orgTranslation,
         @Parameter(name="inactive") @RequestParam boolean inactive
-        )
-        {
-
+        ){
         UCSBOrganization organization = new UCSBOrganization();
         organization.setOrgCode(orgCode);
         organization.setOrgTranslationShort(orgTranslationShort);
@@ -91,5 +89,47 @@ public class UCSBOrganizationController extends ApiController {
         UCSBOrganization savedOrganization = ucsbOrganizationRepository.save(organization);
 
         return savedOrganization;
+    }
+
+    /**
+     * Delete a organization. Accessible only to users with the role "ROLE_ADMIN".
+     * @param orgCode code of the organization
+     * @return a message indiciating the organization was deleted
+     */
+    @Operation(summary= "Delete a UCSBOrganization")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("")
+    public Object deleteOrganization(
+        @Parameter(name="orgCode") @RequestParam String orgCode) {
+        UCSBOrganization organization = ucsbOrganizationRepository.findById(orgCode)
+                .orElseThrow(() -> new EntityNotFoundException(UCSBOrganization.class, orgCode));
+
+        ucsbOrganizationRepository.delete(organization);
+        return genericMessage("UCSBOrganization with id %s deleted".formatted(orgCode));
+    }
+
+    /**
+     * Update a single organization. Accessible only to users with the role "ROLE_ADMIN".
+     * @param orgCode code of the organization
+     * @param incoming the new organization contents
+     * @return the updated organization object
+     */
+    @Operation(summary= "Update a single organization")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("")
+    public UCSBOrganization updateOrganization(
+        @Parameter(name="orgCode") @RequestParam String orgCode,
+        @RequestBody @Valid UCSBOrganization incoming) {
+        UCSBOrganization organization = ucsbOrganizationRepository.findById(orgCode)
+                .orElseThrow(() -> new EntityNotFoundException(UCSBOrganization.class, orgCode));
+
+
+        organization.setOrgTranslationShort(incoming.getOrgTranslationShort());
+        organization.setOrgTranslation(incoming.getOrgTranslation());
+        organization.setInactive(incoming.getInactive());
+
+        ucsbOrganizationRepository.save(organization);
+
+        return organization;
     }
 }
